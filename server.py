@@ -1,5 +1,8 @@
 #  coding: utf-8 
 import socketserver
+import socket
+import os
+import os.path
 
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
 # 
@@ -32,7 +35,84 @@ class MyWebServer(socketserver.BaseRequestHandler):
     def handle(self):
         self.data = self.request.recv(1024).strip()
         print ("Got a request of: %s\n" % self.data)
-        self.request.sendall(bytearray("OK",'utf-8'))
+        if self.data:
+            payload = self.data.decode().split()
+            method,path = payload[0],payload[1]
+
+            if method == "GET":
+                if self.test_path(path):
+                    if os.path.exists("./www{}/index.html".format(path)) and path.endswith("html"):
+                        content = open( "./www{}".format(path),'r').read()
+                        status = "HTTP/1.1 200 OK\r\n"
+                        status_code = status.encode()
+                        content_len = "Content-Length: {}\r\n".format(str(len(content)))
+                        content_len_code = content_len.encode()
+                        content_type = "Content-Type: text/html;\r\n"
+                        content_type_code = content_type.encode()
+                        content_boby = content.encode()
+                        close = "Connection : close \r\n\r\n"
+                        header = status_code + content_len_code+ content_type_code + close + '\r\n'+ content_boby                           
+                        self.request.sendall(header)
+                    elif os.path.exists("./www{}".format(path)) and path.endswith("css"):
+                        content = open( "./www"+ path,'r').read()
+                        status = "HTTP/1.1 200 OK\r\n"
+                        status_code = status
+                        content_len = "Content-Length: {}\r\n".format(str(len(content)))
+                        content_type = "Content-Type: text/css;\r\n"
+                        content_type_code = content_type
+                        content_len_code = content_len
+
+                        content_boby = content
+                        close = "Connection : close \r\n\r\n"
+                        header = status_code + content_len_code + content_type_code + close + '\r\n'+ content_boby                          
+                        self.request.sendall(header.encode())
+                    elif os.path.exists("./www{}".format(path)) and path.endswith("html"):
+                        content = open( "./www"+ path,'r').read()
+                        status = "HTTP/1.1 200 OK\r\n"
+                        status_code = status
+                        content_len = "Content-Length: {}\r\n".format(str(len(content)))
+                        content_type = "Content-Type: text/html;\r\n"
+                        content_type_code = content_type
+                        content_len_code = content_len
+
+                        content_boby = content
+                        close = "Connection : close \r\n\r\n"
+                        header = status_code + content_len_code + content_type_code + close + '\r\n'+ content_boby                          
+                        self.request.sendall(header.encode())
+                    elif os.path.exists("./www{}/index.html".format(path)) and path.endswith("/"):
+                        path = "./www{}index.html".format(path)
+                        if open( path,'r').read():
+                            content = open( path,'r').read()
+
+                            status = "HTTP/1.1 200 OK\r\n"
+                            status_code = status
+                            content_len = ("Content-Length: {}\r\n".format(str(len(content))))
+                            content_type = "Content-Type: text/html;\r\n"
+                        
+                            content_type_code = content_type
+                            content_boby = content
+                            close = "Connection : close \r\n\r\n"
+                            content_len_code = content_len
+                            header = status_code + content_len_code + content_type_code + close + '\r\n'+ content_boby                           
+                            self.request.sendall(header.encode())
+                        else:
+                            self.request.send("HTTP/1.1 404 Not Found".encode())  
+                    
+                    else:
+                        if os.path.isfile("./www{}/index.html".format(path)):
+                            status = "HTTP/1.1 301 Moved Permanently"
+                            status_code = status
+                            location= "Location: http://127.0.0.1:8080{}/".format(path)
+                            header = "{0}\r\n{1}\r\n{2}".format(status_code, location, "\r\n").encode()
+                            self.request.sendall(header)
+                        else:
+                            self.request.send("HTTP/1.1 404 Not Found\r\n\r\n".encode())  
+                else : self.request.send("HTTP/1.1 404 Not Found\r\n\r\n".encode())  
+            else:self.request.send("HTTP/1.1 405 Method Not Allowed".encode())
+
+    def test_path(self,path):
+        return os.path.realpath(os.getcwd()+'/www' +path).startswith(os.getcwd()+'/www')
+
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
