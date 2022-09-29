@@ -110,7 +110,13 @@ class MyWebServer(socketserver.BaseRequestHandler):
             else:self.request.send("HTTP/1.1 405 Method Not Allowed".encode())
 
     def test_path(self,path):
-        return os.path.realpath(os.getcwd()+'/www' +path).startswith(os.getcwd()+'/www')
+        current_path = os.getcwd()
+        real_path = os.path.realpath("{}/www{}".format(current_path, path))
+
+        return (
+            os.path.exists(real_path)
+            and os.path.commonpath([current_path, real_path]) == current_path
+        )
 
 
 if __name__ == "__main__":
