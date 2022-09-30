@@ -52,7 +52,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
                         content_boby = content.encode()
                         close = "Connection : close \r\n\r\n"
                         header = status_code + content_len_code+ content_type_code + close + '\r\n'+ content_boby                           
-                        self.request.sendall(header)
+                        self.request.sendall(header.encode())
                     elif os.path.exists("./www{}".format(path)) and path.endswith("css"):
                         content = open( "./www{}".format(path),'r').read()
                         status = "HTTP/1.1 200 OK\r\n"
@@ -96,7 +96,8 @@ class MyWebServer(socketserver.BaseRequestHandler):
                             header = status_code + content_len_code + content_type_code + close + '\r\n'+ content_boby                           
                             self.request.sendall(header.encode())
                         else:
-                            self.request.send("HTTP/1.1 404 Not Found".encode())  
+                            status_code = "HTTP/1.1 404 Not Found"
+                            self.request.sendall(status_code.encode())  
                     
                     else:
                         if os.path.isfile("./www{}/index.html".format(path)):
@@ -105,18 +106,19 @@ class MyWebServer(socketserver.BaseRequestHandler):
                             header = "{0}\r\n{1}\r\n{2}".format(status_code, location, "\r\n").encode()
                             self.request.sendall(header)
                         else:
-                            self.request.send("HTTP/1.1 404 Not Found\r\n\r\n".encode())  
-                else : self.request.send("HTTP/1.1 404 Not Found\r\n\r\n".encode())  
-            else:self.request.send("HTTP/1.1 405 Method Not Allowed".encode())
+                            status_code = "HTTP/1.1 404 Not Found\r\n\r\n"
+                            self.request.sendall(status_code.encode())  
+                else :
+                    status_code = "HTTP/1.1 404 Not Found\r\n\r\n"
+                    self.request.sendall(status_code.encode())  
+            else:
+                status_code = "HTTP/1.1 405 Method Not Allowed"
+                self.request.sendall(status_code.encode())
 
     def test_path(self,path):
         current_path = os.getcwd()
         real_path = os.path.realpath("{}/www{}".format(current_path, path))
-
-        return (
-            os.path.exists(real_path)
-            and os.path.commonpath([current_path, real_path]) == current_path
-        )
+        return real_path.startswith("{}/www".format(current_path))
 
 
 if __name__ == "__main__":
