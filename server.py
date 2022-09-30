@@ -61,6 +61,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
                         content_type = "Content-Type: text/css;\r\n"
                         content_type_code = content_type
                         content_len_code = content_len
+                        
 
                         content_boby = content
                         close = "Connection : close \r\n\r\n"
