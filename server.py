@@ -117,9 +117,13 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 self.request.sendall(status_code.encode())
 
     def test_path(self,path):
+<<<<<<< HEAD
         current_path = os.getcwd()
         real_path = os.path.realpath("{}/www{}".format(current_path, path))
         return real_path.startswith("{}/www".format(current_path))
+=======
+        return os.path.realpath(os.getcwd()+'/www' +path).startswith(os.getcwd()+'/www')
+>>>>>>> parent of 82d0a90 (update)
 
 
 if __name__ == "__main__":
