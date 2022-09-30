@@ -54,7 +54,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
                         header = status_code + content_len_code+ content_type_code + close + '\r\n'+ content_boby                           
                         self.request.sendall(header.encode())
                     elif os.path.exists("./www{}".format(path)) and path.endswith("css"):
-                        content = open( "./www{}".format(path),'r').read()
+                        content = open( "./www"+ path,'r').read()
                         status = "HTTP/1.1 200 OK\r\n"
                         status_code = status
                         content_len = "Content-Length: {}\r\n".format(str(len(content)))
@@ -67,7 +67,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
                         header = status_code + content_len_code + content_type_code + close + '\r\n'+ content_boby                          
                         self.request.sendall(header.encode())
                     elif os.path.exists("./www{}".format(path)) and path.endswith("html"):
-                        content = open( "./www{}".format(path),'r').read()
+                        content = open( "./www"+ path,'r').read()
                         status = "HTTP/1.1 200 OK\r\n"
                         status_code = status
                         content_len = "Content-Length: {}\r\n".format(str(len(content)))
@@ -101,7 +101,8 @@ class MyWebServer(socketserver.BaseRequestHandler):
                     
                     else:
                         if os.path.isfile("./www{}/index.html".format(path)):
-                            status_code = "HTTP/1.1 301 Moved Permanently"
+                            status = "HTTP/1.1 301 Moved Permanently"
+                            status_code = status
                             location= "Location: http://127.0.0.1:8080{}/".format(path)
                             header = "{0}\r\n{1}\r\n{2}".format(status_code, location, "\r\n").encode()
                             self.request.sendall(header)
